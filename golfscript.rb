@@ -301,9 +301,11 @@ class Array
 	include Comparable
 end
 
-code=gets(nil)||''
-$_=$stdin.isatty ? '' : $stdin.read
-$stack = [Gstring.new($_)]
+#code=gets(nil)||''
+code=$stdin.read
+#$_=$stdin.isatty ? '' : $stdin.read
+#$stack = [Gstring.new($_)]
+$stack = [Garray.new($*.map{|arg| Gstring.new(arg)})]
 $var_lookup={}
 
 def var(name,val=nil)
@@ -407,4 +409,4 @@ var'base','gpush b.base(a)'.cc2
 '.compile.go
 code.compile.go
 gpush Garray.new($stack)
-'puts'.compile.go
+'puts'.compile.go unless ENV['QUINE']
