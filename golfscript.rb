@@ -302,14 +302,14 @@ class Array
 end
 
 implicit_output = true
-$no_eval = false
+$no_interpolation = false
 code = $stack = nil
 while ARGV.size > 0 && ARGV[0] =~ /^-/ do
   case ARGV.shift
   when "-s"; code ||= $stdin.read
   when "-e"; code ||= ARGV.shift
   when "-q"; implicit_output = false
-  when "-n"; $no_eval = true
+  when "-n"; $no_interpolation = true
   when "--"; $stack = [Garray.new($*.map{|arg| Gstring.new(arg)})]; break
   else; $stderr.puts 'flags:
     -s: code from stdin
@@ -344,7 +344,9 @@ class String
 				when "{" then "$stack<<"+var("{#{$nprocs+=1}",compile(tokens))
 				when "}" then break
 				when ":" then var(tokens.slice!(0))+"=$stack.last"
-				when /^["']/ then var(t, Gstring.new(eval($no_eval && t=~/^"/ ? t.gsub('#','\#') : t)))+".go"
+				when /^["']/ then
+					value = $no_interpolation ? eval(t.gsub('#', '# ')).gsub('# ','#') : eval(t)
+					var(t, Gstring.new(value))+".go"
 				when /^-?[0-9]+/ then var(t,t.to_i)+".go"
 				else; var(t)+".go"
 				end+"\n"

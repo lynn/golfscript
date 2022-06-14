@@ -18,7 +18,7 @@ if __name__ == "__main__":
         # Luck / weird problems
         if prob.name in ["123", "123 Reloaded", "Error", "Inverse Quine", "Not Quine", "Palindromic Quine", "Quine", "Timeout"]: continue
         # Ruby version / float / rational trickery
-        if prob.name in ["area of triangle", "0_5 broken keyboard", "Cancel fractions", "Equal Temperament", "MIDI note number to frequency", "Numloop"]: continue
+        if prob.name in ["area of triangle", "Concentric Circles", "0_5 broken keyboard", "Cancel fractions", "Equal Temperament", "MIDI note number to frequency", "Numloop"]: continue
         # Sisyphus's dump was unluckily case-insensitive, so these have wrong answers mixed in:
         if prob.name.lower() in ["helloworld", "christmas tree", "multiplication table"]: continue
 
