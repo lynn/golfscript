@@ -158,7 +158,7 @@ class Garray < Gtype
 					j+=1
 				end
 			end
-			r<<i unless no_empty && i.val.empty?
+			r << i unless no_empty && i.val.empty?
 			Garray.new(r)
 		end
 	end
@@ -232,7 +232,7 @@ class Gblock < Garray
 	def go; @native.call; end
 	def factory(b); Gstring.new(b).to_s.compile; end
 	def class_id; 3; end
-	def to_gs; Gstring.new(([123]+@val)<<125); end
+	def to_gs; Gstring.new([123]+@val+[125]); end
 	def ginspect; to_gs; end
 	def gscoerce(b); b.gscoerce(self).reverse; end
 	def addop(b)
