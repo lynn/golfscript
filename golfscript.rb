@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/ruby --encoding ASCII-8BIT
 #(c) Copyright 2008 Darren Smith. All Rights Reserved.
 $lb = []
 class Gtype
@@ -301,11 +301,31 @@ class Array
 	include Comparable
 end
 
-#code=gets(nil)||''
-code=$stdin.read
-#$_=$stdin.isatty ? '' : $stdin.read
-#$stack = [Gstring.new($_)]
-$stack = [Garray.new($*.map{|arg| Gstring.new(arg)})]
+implicit_output = true
+$no_eval = false
+code = $stack = nil
+while ARGV.size > 0 && ARGV[0] =~ /^-/ do
+  case ARGV.shift
+  when "-s"; code ||= $stdin.read
+  when "-e"; code ||= ARGV.shift
+  when "-q"; implicit_output = false
+  when "-n"; $no_eval = true
+  when "--"; $stack = [Garray.new($*.map{|arg| Gstring.new(arg)})]; break
+  else; $stderr.puts 'flags:
+    -s: code from stdin
+    -e: code from next arg (raw)
+    -q: no implicit output
+    -n: no "#{eval}"
+    --: all following args are problem input (single array of strings on stack)'; exit 1
+  end
+end
+
+# Defaults:
+# - Read code from an ARGV filename, or STDIN if ARGV is now empty.
+code ||= gets(nil) || ''
+# - The stack contains STDIN as a string.
+$stack ||= [Gstring.new($stdin.isatty ? '' : $stdin.read)]
+
 $var_lookup={}
 
 def var(name,val=nil)
@@ -324,7 +344,7 @@ class String
 				when "{" then "$stack<<"+var("{#{$nprocs+=1}",compile(tokens))
 				when "}" then break
 				when ":" then var(tokens.slice!(0))+"=$stack.last"
-				when /^["']/ then var(t,Gstring.new(eval(t)))+".go"
+				when /^["']/ then var(t, Gstring.new(eval($no_eval && t=~/^"/ ? t.gsub('#','\#') : t)))+".go"
 				when /^-?[0-9]+/ then var(t,t.to_i)+".go"
 				else; var(t)+".go"
 				end+"\n"
@@ -409,4 +429,4 @@ var'base','gpush b.base(a)'.cc2
 '.compile.go
 code.compile.go
 gpush Garray.new($stack)
-'puts'.compile.go unless ENV['QUINE']
+'puts'.compile.go if implicit_output
