@@ -3,7 +3,7 @@
 $lb = []
 class Gtype
 	def initialize_copy(other); @val = other.val.dup; end
-	def go; $stack<<self; end
+	def go; $stack << self; end
 	def val; @val; end
 	def addop(rhs); rhs.class != self.class ? (a,b=gscoerce(rhs); a.addop(b)) : factory(@val + rhs.val); end
 	def subop(rhs); rhs.class != self.class ? (a,b=gscoerce(rhs); a.subop(b)) : factory(@val - rhs.val); end
@@ -25,7 +25,7 @@ class Numeric
 	def difop(rhs); rhs.is_a?(Numeric) ? self ^ rhs : (a,b=gscoerce(rhs); a.difop(b)); end
 	def to_gs; Gstring.new(to_s); end
 	def ginspect; to_gs; end
-	def go; $stack<<self; end
+	def go; $stack << self; end
 	def notop; self == 0 ? 1 : 0; end
 	def class_id; 0; end
 	def falsey; self == 0; end
@@ -91,7 +91,7 @@ class Garray < Gtype
 	end
 	def flatten_append(prefix)
 		@val.inject(prefix){|s,i|case i
-			when Numeric then s<<i
+			when Numeric then s << i
 			when Garray then i.flatten_append(s)
 			when Gstring then s.concat(i.val)
 			when Gblock then s.concat(i.val)
@@ -105,7 +105,7 @@ class Garray < Gtype
 		bs << 93
 		Gstring.new(bs)
 	end
-	def go; $stack<<self; end
+	def go; $stack << self; end
 	def class_id; 1; end
 	def gscoerce(b)
 		c = b.class_id
@@ -150,11 +150,11 @@ class Garray < Gtype
 			j=0
 			while j<@val.size
 				if @val[j,b.val.size]==b.val
-					r<<i unless no_empty && i.val.empty?
+					r << i unless no_empty && i.val.empty?
 					i=b.factory([])
 					j+=b.val.size
 				else
-					i.val<<@val[j]
+					i.val << @val[j]
 					j+=1
 				end
 			end
@@ -165,7 +165,7 @@ class Garray < Gtype
 	def %(b)
 		if Numeric === b
 			factory((0..(@val.size-1)/b.abs).inject([]){|s,i|
-				s<<@val[b < 0 ? i*b - 1 : i*b]
+				s << @val[b < 0 ? i*b - 1 : i*b]
 			})
 		else
 			self./(b, true)
@@ -181,7 +181,7 @@ class Garray < Gtype
 		r=[]
 		@val.size.times{|x|
 			@val[x].val.size.times{|y|
-				(r[y]||=@val[0].factory([])).val<<@val[x].val[y]
+				(r[y]||=@val[0].factory([])).val << @val[x].val[y]
 			}
 		}
 		Garray.new(r)
@@ -248,7 +248,7 @@ class Gblock < Garray
 			b.times{go}
 		else
 			gpush b.val.first
-			(b.val[1..-1]||[]).each{|i|$stack<<i; go}
+			(b.val[1..-1]||[]).each{|i|$stack << i; go}
 		end
 		nil
 	end
@@ -259,10 +259,10 @@ class Gblock < Garray
 		else #unfold
 			r=[]
 			loop{
-				$stack<<$stack.last
+				$stack << $stack.last
 				go
 				break if gpop.falsey;
-				r<<$stack.last
+				r << $stack.last
 				b.go
 			}
 			gpop
@@ -273,7 +273,7 @@ class Gblock < Garray
 		r=[]
 		b.val.each{|i|
 			lb=$stack.size
-			$stack<<i; go
+			$stack << i; go
 			r.concat($stack.slice!(lb..$stack.size))
 		}
 		r=Garray.new(r)
@@ -340,7 +340,7 @@ class String
 	 	orig=tokens.dup
 		native=""
 		while t=tokens.slice!(0)
-			native<<case t
+			native << case t
 				when "{" then "$stack<<"+var("{#{$nprocs+=1}",compile(tokens))
 				when "}" then break
 				when ":" then var(tokens.slice!(0))+"=$stack.last"
